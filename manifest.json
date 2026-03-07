@@ -3,7 +3,7 @@
   "name": "Shadow Talk",
   "version": "1.0.0",
   "description": "Turn any YouTube video into a speaking practice tool. Shadow native speakers sentence by sentence.",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab"],
   "host_permissions": ["*://*.youtube.com/*"],
   "background": {
     "service_worker": "background.js"
