@@ -21,6 +21,7 @@
         "content/transcript.js",
         "content/player.js",
         "content/speech.js",
+        "content/recorder.js",
         "content/scoring.js",
         "content/ui.js",
         "content/content.js"

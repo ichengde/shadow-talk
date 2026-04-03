@@ -212,7 +212,7 @@ const ShadowUI = (() => {
   /**
    * Render the score result after user speaks.
    */
-  function renderScore(result, sentence, sentenceIndex, totalSentences, callbacks) {
+  function renderScore(result, sentence, sentenceIndex, totalSentences, callbacks, recordingUrl) {
     const scoreClass =
       result.score >= 80 ? 'st-score-great' :
       result.score >= 50 ? 'st-score-good' : 'st-score-poor';
@@ -220,6 +220,8 @@ const ShadowUI = (() => {
     const scoreLabel =
       result.score >= 80 ? 'Great job!' :
       result.score >= 50 ? 'Good effort!' : 'Try again!';
+
+    const hasRecording = !!recordingUrl;
 
     show();
     overlay.innerHTML = `
@@ -242,8 +244,14 @@ const ShadowUI = (() => {
           <div class="st-sentence-label">You said</div>
           <div class="st-sentence-text">${_renderUserWords(result.userWords)}</div>
         </div>
+        <div class="st-compare">
+          <div class="st-compare-label">Compare</div>
+          <div class="st-compare-buttons">
+            <button class="st-btn st-btn-compare" data-action="play-original">&#9654; Original</button>
+            <button class="st-btn st-btn-compare" data-action="play-recording" ${hasRecording ? '' : 'disabled'}>&#9654; My Recording</button>
+          </div>
+        </div>
         <div class="st-buttons">
-          <button class="st-btn st-btn-secondary" data-action="replay">Replay</button>
           <button class="st-btn st-btn-secondary" data-action="retry">Retry</button>
           <button class="st-btn st-btn-primary" data-action="continue">Continue</button>
         </div>
@@ -251,9 +259,65 @@ const ShadowUI = (() => {
     `;
 
     overlay.querySelector('[data-action="stop"]').onclick = callbacks.onStop;
-    overlay.querySelector('[data-action="replay"]').onclick = callbacks.onReplay;
     overlay.querySelector('[data-action="retry"]').onclick = callbacks.onRetry;
     overlay.querySelector('[data-action="continue"]').onclick = callbacks.onContinue;
+
+    const origBtn = overlay.querySelector('[data-action="play-original"]');
+    const recBtn = overlay.querySelector('[data-action="play-recording"]');
+    let playingOriginal = false;
+
+    origBtn.onclick = () => {
+      if (playingOriginal) {
+        ShadowPlayer.pause();
+        ShadowPlayer.stopWatching();
+        origBtn.innerHTML = '&#9654; Original';
+        playingOriginal = false;
+        return;
+      }
+      // Stop the other playback first
+      ShadowRecorder.stopPlayback();
+      recBtn.innerHTML = '&#9654; My Recording';
+
+      origBtn.innerHTML = '&#9632; Stop';
+      playingOriginal = true;
+      callbacks.onPlayOriginal();
+      ShadowPlayer.watchForTime(sentence.endTime, () => {
+        origBtn.innerHTML = '&#9654; Original';
+        playingOriginal = false;
+      });
+    };
+
+    if (hasRecording) {
+      let playingRec = false;
+      recBtn.onclick = () => {
+        if (playingRec) {
+          ShadowRecorder.stopPlayback();
+          recBtn.innerHTML = '&#9654; My Recording';
+          playingRec = false;
+          return;
+        }
+        // Stop the other playback first
+        if (playingOriginal) {
+          ShadowPlayer.pause();
+          ShadowPlayer.stopWatching();
+          origBtn.innerHTML = '&#9654; Original';
+          playingOriginal = false;
+        }
+
+        recBtn.innerHTML = '&#9632; Stop';
+        playingRec = true;
+        callbacks.onPlayRecording();
+        ShadowRecorder.playRecording()
+          .then(() => {
+            recBtn.innerHTML = '&#9654; My Recording';
+            playingRec = false;
+          })
+          .catch(() => {
+            recBtn.innerHTML = '&#9654; My Recording';
+            playingRec = false;
+          });
+      };
+    }
   }
 
   /**

@@ -83,27 +83,29 @@
       onSkip: () => skipSentence(index),
     });
 
-    // Start listening with live preview callback
+    ShadowRecorder.startRecording();
+
     ShadowSpeech.listen(language, 20000, 2000, (liveText) => {
-      // Update the UI with what the user is saying in real-time
       const liveEl = document.querySelector('.st-live-text');
       if (liveEl) liveEl.textContent = liveText;
     })
-      .then((result) => {
+      .then(async (result) => {
         if (!isActive) return;
-        showScore(index, result.transcript);
+        const recordingUrl = await ShadowRecorder.stopRecording();
+        showScore(index, result.transcript, recordingUrl);
       })
-      .catch((err) => {
+      .catch(async (err) => {
         console.error('[ShadowTalk] Speech error:', err);
         if (!isActive) return;
-        showScore(index, '');
+        const recordingUrl = await ShadowRecorder.stopRecording();
+        showScore(index, '', recordingUrl);
       });
   }
 
   /**
    * Show the scoring result.
    */
-  function showScore(index, userTranscript) {
+  function showScore(index, userTranscript, recordingUrl) {
     if (!isActive) return;
 
     const sentence = sentences[index];
@@ -116,7 +118,16 @@
       onReplay: () => replaySentence(index),
       onRetry: () => retrySentence(index),
       onContinue: () => nextSentence(index),
-    });
+      onPlayOriginal: () => {
+        ShadowRecorder.stopPlayback();
+        ShadowPlayer.seekTo(sentence.startTime);
+        ShadowPlayer.play();
+      },
+      onPlayRecording: () => {
+        ShadowPlayer.pause();
+        ShadowPlayer.stopWatching();
+      },
+    }, recordingUrl);
   }
 
   /**
@@ -124,6 +135,7 @@
    */
   function replaySentence(index) {
     ShadowSpeech.abort();
+    ShadowRecorder.cleanup();
     const sentence = sentences[index];
     ShadowPlayer.seekTo(sentence.startTime);
     ShadowPlayer.play();
@@ -137,8 +149,8 @@
    * Retry speaking the same sentence (don't replay video).
    */
   function retrySentence(index) {
-    // Remove last score since we're retrying
     if (scores.length > 0) scores.pop();
+    ShadowRecorder.cleanup();
     promptUser(index);
   }
 
@@ -147,7 +159,8 @@
    */
   function skipSentence(index) {
     ShadowSpeech.abort();
-    scores.push(0); // count skip as 0
+    ShadowRecorder.cleanup();
+    scores.push(0);
     nextSentence(index);
   }
 
@@ -156,6 +169,7 @@
    */
   function nextSentence(index) {
     ShadowSpeech.abort();
+    ShadowRecorder.cleanup();
     const next = index + 1;
     if (next >= sentences.length) {
       finishSession();
@@ -171,6 +185,7 @@
     isActive = false;
     ShadowPlayer.stopWatching();
     ShadowSpeech.abort();
+    ShadowRecorder.releaseStream();
     ShadowPlayer.pause();
 
     const avg =
@@ -199,6 +214,7 @@
     isActive = false;
     ShadowPlayer.stopWatching();
     ShadowSpeech.abort();
+    ShadowRecorder.releaseStream();
     ShadowPlayer.pause();
     ShadowUI.renderStart(startShadowing);
   }
@@ -236,6 +252,7 @@
       if (isActive) stopShadowing();
       ShadowUI.destroy();
       ShadowPlayer.destroy();
+      ShadowRecorder.releaseStream();
       // Re-init after a short delay (wait for new page to load)
       setTimeout(() => {
         if (location.href.includes('youtube.com/watch')) {

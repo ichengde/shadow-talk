@@ -31,8 +31,11 @@
   <p>The extension reads caption/transcript data from YouTube video pages to display sentences for shadowing practice. This data is read directly from the YouTube page you are viewing and is not sent anywhere.</p>
 
   <h3>Speech Recognition</h3>
-  <p>The extension uses the Web Speech API built into your browser (Chrome) to recognize your speech during practice sessions. Speech audio is processed by your browser's built-in speech recognition engine. The extension itself does not record, store, or transmit any audio.</p>
+  <p>The extension uses the Web Speech API built into your browser (Chrome) to recognize your speech during practice sessions. Speech audio is processed by your browser's built-in speech recognition engine.</p>
   <p><em>Note: Chrome's Web Speech API may send audio to Google's servers for processing. This is a browser-level behavior controlled by Google, not by this extension. See <a href="https://policies.google.com/privacy">Google's Privacy Policy</a> for details.</em></p>
+
+  <h3>Voice Recording Playback</h3>
+  <p>During practice, the extension records your voice so you can play it back and compare with the original video audio. Recordings are held in browser memory only and are discarded when you move to the next sentence or close the panel. No audio is saved to disk, stored, or transmitted.</p>
 
   <h3>Local Storage</h3>
   <p>The extension uses Chrome's local storage to save user preferences such as selected language. This data never leaves your device.</p>

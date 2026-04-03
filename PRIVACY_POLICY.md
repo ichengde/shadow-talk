@@ -21,8 +21,12 @@ The extension accesses the following data, all of which stays entirely on your d
 ### Speech Recognition
 - The extension uses the Web Speech API built into your browser (Chrome) to recognize your speech during practice sessions.
 - Speech audio is processed by your browser's built-in speech recognition engine.
-- The extension itself does not record, store, or transmit any audio.
 - Note: Chrome's Web Speech API may send audio to Google's servers for processing. This is a browser-level behavior controlled by Google, not by this extension. See [Google's Privacy Policy](https://policies.google.com/privacy) for details.
+
+### Voice Recording Playback
+- During practice, the extension records your voice so you can play it back and compare with the original video audio.
+- Recordings are held in browser memory only and are discarded when you move to the next sentence or close the panel.
+- No audio is saved to disk, stored, or transmitted.
 
 ### Local Storage
 - The extension uses Chrome's local storage (`chrome.storage.local`) to save user preferences such as selected language.

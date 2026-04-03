@@ -198,6 +198,47 @@
   white-space: nowrap;
 }
 
+/* A/B Compare */
+.st-compare {
+  margin-bottom: 12px;
+}
+
+.st-compare-label {
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.st-compare-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.st-btn-compare {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #0f3460;
+  border-radius: 8px;
+  background: transparent;
+  color: #ccc;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.st-btn-compare:hover:not(:disabled) {
+  background: #16213e;
+  border-color: #e94560;
+}
+
+.st-btn-compare:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 /* Buttons */
 .st-buttons {
   display: flex;
